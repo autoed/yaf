@@ -10,8 +10,10 @@ trait Api
      * Email: fomo3d.wiki@gmail.com
      * Date: 2020/5/10
      */
-    public function api()
+    public function apiAction()
     {
-        $this->load->view('api', array('notice'=>'You should know , this api is useful !'));
+        $this->getView()->assign('notice', 'You should know , this api is useful !');
+        $this->getView()->assign('host', AUTO_TEST_API_HOST);
+        echo $this->getView()->render('api.php');
     }
 }

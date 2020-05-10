@@ -144,20 +144,19 @@ Class Auto
      * 自动注解：载入数据
      * User:  fomo3d.wiki
      * Email: fomo3d.wiki@gmail.com
-     * Date: 2020/5/10
-     * @param $class
-     * @param $method
+     * Date: 2020/5/11
+     * @param $className
+     * @param $actionName
+     * @param $allRoute
      * @return mixed
      * @throws \ReflectionException
      */
-    public static function _auto($class, $method)
+    public static function _auto($className, $actionName, $allRoute)
     {
-        $classObject = $class;
-        $reflection = new \ReflectionClass($classObject);
-
+        $reflection = new \ReflectionClass($className);
         $methodObjectArr = $reflection->getMethods();
         foreach ($methodObjectArr as $key => $item) {
-            if ($item->name == $method) {
+            if ($item->name == $actionName) {
                 $realKey = $key;
             }
         }
@@ -304,24 +303,34 @@ $(".sendBtn").on("click",function(){
      * 生成 HTML格式的 文档
      * User:  fomo3d.wiki
      * Email: fomo3d.wiki@gmail.com
-     * Date: 2020/5/10
-     * @param $uri
+     * Date: 2020/5/11
+     * @param $className
+     * @param $actionName
+     * @param $allRoute
      * @return string
      * @throws \ReflectionException
      */
-    public static function getStrDoc($uri)
+    public static function getStrDoc($className, $actionName, $allRoute)
     {
-        $class = $uri->rsegments[1];
-        $classObject = new $class;
-        $reflection  = new \ReflectionClass($classObject);
+        if(explode('action',strtolower($actionName))[0] != 'api') {
+            return '';
+        }
+        $reflection  = new \ReflectionClass($className);
         $methodObjectArr = $reflection->getMethods();
         $strDoc = '';
         //黑名单过滤
         $blackFunNames = self::getBlackFunNames(array('api'));
 
         foreach ($methodObjectArr as $key => $item) {
-            if (!in_array($item->name, $blackFunNames)) {
                 $funRouteName = self::getFunRouteName($item);
+                if (!isset($allRoute[$funRouteName])) {
+                    continue;
+                }
+                $funRouteName = $allRoute[$funRouteName];
+               if (in_array(explode('/',$funRouteName)[2], $blackFunNames)) {
+                   continue;
+               }
+                $funRouteName = trim($funRouteName, '/');
                 $deal_array   = self::deal($item->getDocComment());
                 $deal_input   = '';
                 array_map(function ($item) use(&$deal_input) {
@@ -337,7 +346,6 @@ $(".sendBtn").on("click",function(){
                     .'<d style="display: none">' .json_encode(array_keys($deal_array['data'])).'</d>'
                     .'<c style="display: none">' .$deal_array['type'].'</c>'
                     . '</div>';
-            }
         }
         return self::getStyle().'<div class="container">'.$strDoc.'</div>'.self::sendCurl();
     }
