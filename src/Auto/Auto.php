@@ -52,6 +52,9 @@ Class Auto
             if (count($strArr)==1) {
                 $strArr = explode('\n', $str);
             }
+            if (strpos($strArr[0], '\r')) {
+                $strArr = explode('\r\n', $str);
+            }
             $doc = '<br>/**</br>';
             array_shift($strArr);
             array_pop($strArr);
@@ -322,30 +325,30 @@ $(".sendBtn").on("click",function(){
         $blackFunNames = self::getBlackFunNames(array('api'));
 
         foreach ($methodObjectArr as $key => $item) {
-                $funRouteName = self::getFunRouteName($item);
-                if (!isset($allRoute[$funRouteName])) {
-                    continue;
-                }
-                $funRouteName = $allRoute[$funRouteName];
-               if (in_array(explode('/',$funRouteName)[2], $blackFunNames)) {
-                   continue;
-               }
-                $funRouteName = trim($funRouteName, '/');
-                $deal_array   = self::deal($item->getDocComment());
-                $deal_input   = '';
-                array_map(function ($item) use(&$deal_input) {
-                    $deal_input .= $item . ':<input class="'.$item.'">'.'<br><br>';
-                }, array_keys($deal_array['data']));
-                $realData = json_encode($deal_array['data']);
-                $strDoc .= '<div style="padding-left: 10px" class="container">'
-                    . self::StrDoc2html($item->getDocComment())
-                    . '<p>'.$deal_input.'</p>'
-                    . '<p style="font-size: 15px;font-weight:  bold;color: #003399"><button class="sendBtn" style="font-weight:  bold;">发送请求</button>'
-                    . ': <a>' . $funRouteName .'</a>'
-                    .'<b style="display: none">' .$realData.'</b>'
-                    .'<d style="display: none">' .json_encode(array_keys($deal_array['data'])).'</d>'
-                    .'<c style="display: none">' .$deal_array['type'].'</c>'
-                    . '</div>';
+            $funRouteName = self::getFunRouteName($item);
+            if (!isset($allRoute[$funRouteName])) {
+                continue;
+            }
+            $funRouteName = $allRoute[$funRouteName];
+            if (in_array(explode('/',$funRouteName)[2], $blackFunNames)) {
+                continue;
+            }
+            $funRouteName = trim($funRouteName, '/');
+            $deal_array   = self::deal($item->getDocComment());
+            $deal_input   = '';
+            array_map(function ($item) use(&$deal_input) {
+                $deal_input .= $item . ':<input class="'.$item.'">'.'<br><br>';
+            }, array_keys($deal_array['data']));
+            $realData = json_encode($deal_array['data']);
+            $strDoc .= '<div style="padding-left: 10px" class="container">'
+                . self::StrDoc2html($item->getDocComment())
+                . '<p>'.$deal_input.'</p>'
+                . '<p style="font-size: 15px;font-weight:  bold;color: #003399"><button class="sendBtn" style="font-weight:  bold;">发送请求</button>'
+                . ': <a>' . $funRouteName .'</a>'
+                .'<b style="display: none">' .$realData.'</b>'
+                .'<d style="display: none">' .json_encode(array_keys($deal_array['data'])).'</d>'
+                .'<c style="display: none">' .$deal_array['type'].'</c>'
+                . '</div>';
         }
         return self::getStyle().'<div class="container">'.$strDoc.'</div>'.self::sendCurl();
     }
