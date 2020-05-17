@@ -45,7 +45,7 @@ Class Auto
      * @return string
      */
     private static function StrDoc2html($doc)
-    {
+    {   $line = 1;
         if ($doc) {
             $str = json_encode($doc, JSON_UNESCAPED_UNICODE);
             $strArr = explode('\n\t', $str);
@@ -58,12 +58,18 @@ Class Auto
             $doc = '<br>/**</br>';
             array_shift($strArr);
             array_pop($strArr);
+            $i = 0;
             foreach ($strArr as $item) {
-                $doc .= '<br>' . $item . '</br>';
+                ++$i;
+                if($i == $line) {
+                    $doc .= '<span>' . $item . '</span><button class ="toggle" style ="background-color: #020213;font-weight: bolder;color: #fff;margin-left: 10px;">展开</button>';
+                } else {
+                    $doc .= '<br>' . $item . '</br>';
+                }
             }
             $doc = $doc . '<br>*/</br>';
         }
-        return $doc;
+        return '<p class="api_doc api_doc_spread">'.$doc.'</p>';
     }
 
     /**
@@ -97,8 +103,7 @@ Class Auto
     {
         $strLowClass = strtolower($item->class);
         $strLowName = strtolower($item->name);
-        $strUrl = $strLowClass . '/' . $strLowName;
-        return $strUrl;
+        return $strLowClass . '/' . $strLowName;
     }
 
     /**
@@ -168,8 +173,7 @@ Class Auto
             $methodDoc = $methodObjectArr[$realKey]->getDocComment();
         }
         $tmp     = self::deal($methodDoc);
-        $realArr = $tmp['data'];
-        return $realArr;
+        return $tmp['data'];
     }
 
     /**
@@ -181,7 +185,7 @@ Class Auto
      */
     public static function getStyle()
     {
-        $style = '<style type="text/css">
+        return '<style type="text/css">
 
 	::selection { background-color: #E13300; color: white; }
 	::-moz-selection { background-color: #E13300; color: white; }
@@ -238,8 +242,14 @@ Class Auto
 		border: 1px solid #D0D0D0;
 		box-shadow: 0 0 8px #D0D0D0;
 	}
+	.api_doc{
+	height:auto;
+	}
+	.api_doc_spread{
+	height:66px;
+	overflow:hidden;
+	}
 	</style>';
-        return $style;
     }
 
     /**
@@ -251,13 +261,14 @@ Class Auto
      */
     public static function sendCurl()
     {
-        $ajax = '<script id="auto_host" class="'.AUTO_TEST_API_HOST.'" type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        return '<script id="auto_host" class="'.AUTO_TEST_API_HOST.'" type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 <script>
-    function ajax(type, url, data,  callback) {
+    function ajax(type, url, data, auth, callback) {
     if (data) {
         $.ajax({
             type: type,
             url: url,
+            beforeSend:function(request){ request.setRequestHeader("auth",auth); },
             data: data,
             success: function (data){
                 callback(data);
@@ -267,6 +278,7 @@ Class Auto
         $.ajax({
             type: type,
             url: url,
+            beforeSend:function(request){ request.setRequestHeader("auth",auth); },
             success: function (data){
                 callback(data);
             },
@@ -275,6 +287,7 @@ Class Auto
 }
 $(".sendBtn").on("click",function(){
     real_button = $(this);
+    auth        = $(".auth").val();
     real_api    = $("#auto_host").attr("class") + "/" + $(this).siblings("a").html();
     real_params = JSON.parse($(this).siblings("b").html());
     real_keys   = JSON.parse($(this).siblings("d").html());
@@ -291,15 +304,24 @@ $(".sendBtn").on("click",function(){
             real_params = real_data;
         }
     };
-    ajax(real_type,real_api,real_params,function(data){
+    console.log(auth);
+    ajax(real_type,real_api,real_params,auth, function(data){
     if(real_button.siblings(".container").length>0){
         real_button.siblings(".container").remove();
     }
     real_button.parent("p").append("<div style=\"background-color: #555555;color: white\" class=\"container\">"+JSON.stringify(data)+"</div>")
     })
     })
+    $(".toggle").on("click",function(){
+        if( $(this).parent(".api_doc").hasClass("api_doc_spread")){
+             $(this).parent(".api_doc").removeClass("api_doc_spread")
+             $(this).html("隐藏");
+        }else{
+            $(this).parent(".api_doc").addClass("api_doc_spread")
+             $(this).html("展开");
+        }
+})
 </script>';
-        return $ajax;
     }
 
     /**
