@@ -362,8 +362,8 @@ $(".sendBtn").on("click",function(){
             $funRouteName = trim($funRouteName, '/');
             $deal_array   = self::deal($item->getDocComment());
             $deal_input   = '';
-            array_map(function ($item) use(&$deal_input) {
-                $deal_input .= $item . ':<input class="'.$item.'">'.'<br><br>';
+            array_map(function ($item) use(&$deal_input,$deal_array) {
+                $deal_input .= $item . ':<input class="'.$item.' " value="'.$deal_array['data'][$item].'">'.'<br><br>';
             }, array_keys($deal_array['data']));
             $realData = json_encode($deal_array['data']);
             $strDoc .= '<div style="padding-left: 10px" class="container">'
