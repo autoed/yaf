@@ -263,12 +263,13 @@ Class Auto
     {
         return '<script id="auto_host" class="'.AUTO_TEST_API_HOST.'" type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
 <script>
-    function ajax(type, url, data, auth, callback) {
+    function ajax(type, url, data, Token, callback) {
     if (data) {
         $.ajax({
             type: type,
             url: url,
-            beforeSend:function(request){ request.setRequestHeader("auth",auth); },
+            beforeSend:function(request){request.setRequestHeader("Token",Token);request.setRequestHeader("Authorization",Token);},
+            crossDomain: true,   
             data: data,
             success: function (data){
                 callback(data);
@@ -278,7 +279,8 @@ Class Auto
         $.ajax({
             type: type,
             url: url,
-            beforeSend:function(request){ request.setRequestHeader("auth",auth); },
+            beforeSend:function(request){request.setRequestHeader("Token",Token);request.setRequestHeader("Authorization",Token);},
+            crossDomain: true,   
             success: function (data){
                 callback(data);
             },
@@ -287,8 +289,10 @@ Class Auto
 }
 $(".sendBtn").on("click",function(){
     real_button = $(this);
-    auth        = $(".auth").val();
-    real_api    = $("#auto_host").attr("class") + "/" + $(this).siblings("a").html();
+    Token       = $(".Token").val();
+    api         = $(".Api").val();
+    host_url    = api ? api : $("#auto_host").attr("class");
+    real_api    = host_url + "/" + $(this).siblings("a").html();
     real_params = JSON.parse($(this).siblings("b").html());
     real_keys   = JSON.parse($(this).siblings("d").html());
     real_type   = real_button.siblings("c").html();
@@ -304,8 +308,8 @@ $(".sendBtn").on("click",function(){
             real_params = real_data;
         }
     };
-    console.log(auth);
-    ajax(real_type,real_api,real_params,auth, function(data){
+    console.log(Token);
+    ajax(real_type,real_api,real_params,Token, function(data){
     if(real_button.siblings(".container").length>0){
         real_button.siblings(".container").remove();
     }
