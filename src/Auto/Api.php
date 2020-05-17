@@ -14,6 +14,6 @@ trait Api
     {
         $this->getView()->assign('notice', 'You should know , this api is useful !');
         $this->getView()->assign('host', AUTO_TEST_API_HOST);
-        echo $this->getView()->render('api.php');
+        echo $this->getView()->render(APP_PATH.'/api.php');
     }
 }
